@@ -28,7 +28,7 @@ class H264Frame(private var path: String, private var imageView: ImageView) {
     }
 
     companion object {
-        private val TIME: Long = 10000
+        private const val TIME: Long = 10000
     }
 
     private fun initPlayer() {

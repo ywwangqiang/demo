@@ -12,6 +12,7 @@ import java.io.*
  * H264播放器
  */
 class H264Player(private var path: String, private var surface: Surface) : Runnable {
+    private val spsByteArray:ByteArray="00 00 00 01 67 42 00 0A 8D 8D 40 28 02 AD 35 05 02 02 07 84 42 29 C0".toByteArray()
 
     private lateinit var mediaCodeC: MediaCodec
     init {
@@ -19,7 +20,7 @@ class H264Player(private var path: String, private var surface: Surface) : Runna
     }
 
     private fun initPlayer() {
-        mediaCodeC = MediaCodec.createDecoderByType("video/avc")//创建解码器,如果抛出异常，说明dps芯片不支持，才用软解方式，FFmpeg
+        mediaCodeC = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)//创建解码器,如果抛出异常，说明dps芯片不支持，才用软解方式，FFmpeg
         //设置视频的参数信息，dps芯片并不知道
         val mediaFormat = MediaFormat.createVideoFormat("video/avc", 368, 384)
         mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 15)//帧率
