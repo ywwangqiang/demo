@@ -1,3 +1,4 @@
+include ':h265toupinsend'
 include ':skin'
 include ':app'
 rootProject.name='wangqiang'

@@ -3,6 +3,7 @@ package com.example.wangqiang.kotlin.h264
 import android.hardware.display.DisplayManager
 import android.media.MediaCodec
 import android.media.MediaCodec.CONFIGURE_FLAG_ENCODE
+import android.media.MediaCodec.createEncoderByType
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
@@ -32,6 +33,7 @@ class H264ScreenRecord(private var mediaProjection: MediaProjection) : Runnable 
 
     private fun initMediaCodec() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mediaCodec= createEncoderByType(MediaFormat.MIMETYPE_VIDEO_HEVC)
             val mediaFormat =
                 MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 540, 960)
             mediaFormat.setInteger(
@@ -121,9 +123,7 @@ class H264ScreenRecord(private var mediaProjection: MediaProjection) : Runnable 
             e.printStackTrace()
         } finally {
             try {
-                if (writer != null) {
-                    writer.close()
-                }
+                writer?.close()
             } catch (e: IOException) {
                 e.printStackTrace()
             }

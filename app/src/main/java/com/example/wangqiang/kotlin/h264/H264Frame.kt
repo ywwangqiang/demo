@@ -72,7 +72,7 @@ class H264Frame(private var path: String, private var imageView: ImageView) {
                             val outPutBuffer = mediaCodeC.getOutputBuffer(outIndex)
                             outPutBuffer?.let {
                                 //outPutBuffer.remaining() 获取bytebuffer的真实长度
-                                var byteArray = ByteArray(outPutBuffer.remaining())
+                                var byteArray = ByteArray(it.remaining())
                                 //将bytebuffer数据放入到字节数组中
                                 it.get(byteArray)
                                 //将得到的字节数组生成yuv
