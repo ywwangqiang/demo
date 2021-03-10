@@ -74,7 +74,7 @@ class H264ScreenRecord(private var mediaProjection: MediaProjection) : Runnable 
 
     }
 
-    private fun start() {
+    fun start() {
         mediaCodec.start()
         Thread(this).start()
     }

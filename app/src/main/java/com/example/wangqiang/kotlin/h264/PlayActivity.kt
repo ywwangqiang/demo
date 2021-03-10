@@ -9,13 +9,18 @@ import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.wangqiang.R
+import com.example.wangqiang.kotlin.h264.music.MusicClibUtils
 import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.File
 
 class PlayActivity : AppCompatActivity() {
     private var h264Frame: H264Frame? = null
@@ -26,9 +31,21 @@ class PlayActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
-        initSurface()
+        initListener();
+//        initSurface()
 //        initFame()
 //        initProjection()
+    }
+
+    private fun initListener() {
+        tv_music_clib.setOnClickListener {
+            Log.d("tag123", "clib onclick")
+            Thread {
+                val sourceFile = File(Environment.getExternalStorageDirectory(), "music.mp3")
+                MusicClibUtils().clib(sourceFile.absolutePath, 10 * 1000 * 1000, 15 * 1000 * 1000)
+            }.start()
+        }
+
     }
 
     //mediacodec获取帧图片
@@ -83,7 +100,9 @@ class PlayActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
-            startRecord()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                startRecord(mediaProjectionManager.getMediaProjection(resultCode, intent))
+            }
         }
     }
 
@@ -92,8 +111,8 @@ class PlayActivity : AppCompatActivity() {
      * mediaProjection将录制屏幕的数据丢给虚拟surface
      * mediacodec拿到虚拟surface的数据丢给dsp芯片进行编码
      */
-    private fun startRecord() {
-
+    private fun startRecord(mediaProjection: MediaProjection) {
+        H264ScreenRecord(mediaProjection).start()
     }
 
     override fun onDestroy() {
