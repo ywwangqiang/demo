@@ -68,6 +68,7 @@ class MusicClibUtils {
                             mediaExtractor.advance()//前进到下一个数据
                         }
                         //通过mediaExtractor读取数据，此时得到的是mp3数据，通过 bytebuffer入参出参获取
+                        //直接通过mediaExtractor获取数据，如果是视频，不再需要通过分隔符
                         bufferInfo.size = mediaExtractor.readSampleData(buffer, 0)
                         bufferInfo.presentationTimeUs = sampleTime
                         bufferInfo.flags = mediaExtractor.sampleFlags
