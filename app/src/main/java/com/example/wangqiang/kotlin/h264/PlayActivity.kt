@@ -39,7 +39,6 @@ class PlayActivity : AppCompatActivity() {
 
     private fun initListener() {
         tv_music_clib.setOnClickListener {
-            Log.d("tag123", "clib onclick")
             Thread {
                 val sourceFile = File(Environment.getExternalStorageDirectory(), "music.mp3")
                 MusicClibUtils().clib(sourceFile.absolutePath, 10 * 1000 * 1000, 15 * 1000 * 1000)

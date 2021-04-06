@@ -25,4 +25,10 @@
         android:layout_height="60dp"
         android:gravity="center"
         android:text="音频剪辑"/>
+    <TextView
+        android:id="@+id/tv_music_mix"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:text="音频剪辑"/>
 </LinearLayout>
