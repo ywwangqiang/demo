@@ -1,5 +1,6 @@
 package com.example.wangqiang.kotlin.h264.music
 
+import android.content.Context
 import android.media.AudioFormat
 import android.media.MediaCodec
 import android.media.MediaExtractor
@@ -116,6 +117,22 @@ class MusicClibUtils {
                 )
             }
         }
+
+    }
+
+    /**
+     * 音频合成
+     * 首先找到视频文件的音频，转成pcm
+     * 找到合成音频文件，转成pcm
+     * 再将两个pcm合并
+     */
+    fun minAudo(context:Context,videoPath:String,audoPath:String,mixOutPath:String,startTime: Long,endTime: Long,videoVolume:Int,audoVolume:Int){
+        var videoOutPcmFile=File(Environment.getExternalStorageDirectory(),"videoOut.pcm")
+        var audioOutPcmFile=File(Environment.getExternalStorageDirectory(),"audioOut.pcm")
+
+    }
+
+    fun decodeToPcm(){
 
     }
 }

@@ -45,6 +45,9 @@ class PlayActivity : AppCompatActivity() {
             }.start()
         }
 
+        tv_music_mix.setOnClickListener {
+
+        }
     }
 
     //mediacodec获取帧图片
