@@ -29,18 +29,8 @@ class MusicClibUtils {
             //获取轨道数量
             val trackCount = mediaExtractor.trackCount
             //遍历每个轨道信息，找到音频的轨道
-            var audioIndex = -1;
-            var format: MediaFormat? = null;
-            for (index in 0..trackCount) {
-                //获取轨道的配置信息
-                val currentFormat = mediaExtractor.getTrackFormat(index)
-                val formatType = currentFormat.getString(MediaFormat.KEY_MIME)//格式的类型
-                if (formatType.startsWith("audio/")) {
-                    audioIndex = index
-                    format = currentFormat
-                    break
-                }
-            }
+            var audioIndex = findTrack(mediaExtractor);
+            var format: MediaFormat? = mediaExtractor.getTrackFormat(audioIndex);
             if (audioIndex >= 0) {
                 mediaExtractor.selectTrack(audioIndex)//对音频轨道进行操作
                 mediaExtractor.seekTo(
@@ -126,13 +116,56 @@ class MusicClibUtils {
      * 找到合成音频文件，转成pcm
      * 再将两个pcm合并
      */
-    fun minAudo(context:Context,videoPath:String,audoPath:String,mixOutPath:String,startTime: Long,endTime: Long,videoVolume:Int,audoVolume:Int){
-        var videoOutPcmFile=File(Environment.getExternalStorageDirectory(),"videoOut.pcm")
-        var audioOutPcmFile=File(Environment.getExternalStorageDirectory(),"audioOut.pcm")
+    fun minAudo(
+        context: Context,
+        videoPath: String,
+        audoPath: String,
+        mixOutPath: String,
+        startTime: Long,
+        endTime: Long,
+        videoVolume: Int,
+        audoVolume: Int
+    ) {
+        var videoOutPcmFile = File(Environment.getExternalStorageDirectory(), "videoOut.pcm")
+        var audioOutPcmFile = File(Environment.getExternalStorageDirectory(), "audioOut.pcm")
 
     }
 
-    fun decodeToPcm(){
+    fun decodeToPcm(inputFile: String, outPutPcmFile: String, startTime: Long, endTime: Long) {
+        if (endTime < startTime) {
+            return
+        }
+        val mediaExtractor = MediaExtractor()
+        mediaExtractor.setDataSource(inputFile)
+        val audioIndex = findTrack(mediaExtractor)
+        if (audioIndex > 0) {
+            mediaExtractor.selectTrack(audioIndex)
+            mediaExtractor.seekTo(startTime, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+            val trackFormat = mediaExtractor.getTrackFormat(audioIndex)
+            val mediaCodec =
+                MediaCodec.createDecoderByType(trackFormat.getString(MediaFormat.KEY_MIME))
+            mediaCodec.configure(trackFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+            var maxBuffer = 1000 * 100;
+            if (trackFormat.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
+                maxBuffer=trackFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE);
+            }
 
+        }
+    }
+
+    fun findTrack(mediaExtractor: MediaExtractor): Int {
+        var trackIndex = -1
+        val count = mediaExtractor.trackCount
+        for (index in 0..count) {
+            val trackFormat = mediaExtractor.getTrackFormat(index)
+            if (trackFormat.containsKey(MediaFormat.KEY_MIME)) {
+                val value = trackFormat.getString(MediaFormat.KEY_MIME)
+                if (value.startsWith("audio/")) {
+                    trackIndex = index;
+                    return trackIndex
+                }
+            }
+        }
+        return trackIndex
     }
 }
