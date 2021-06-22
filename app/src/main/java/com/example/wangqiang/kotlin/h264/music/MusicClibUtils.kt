@@ -11,6 +11,7 @@ import com.example.wangqiang.util.PcmToWavUtil
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 
 /**
  *     author : wangqiang
@@ -135,21 +136,65 @@ class MusicClibUtils {
         if (endTime < startTime) {
             return
         }
-        val mediaExtractor = MediaExtractor()
-        mediaExtractor.setDataSource(inputFile)
-        val audioIndex = findTrack(mediaExtractor)
-        if (audioIndex > 0) {
-            mediaExtractor.selectTrack(audioIndex)
-            mediaExtractor.seekTo(startTime, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
-            val trackFormat = mediaExtractor.getTrackFormat(audioIndex)
-            val mediaCodec =
-                MediaCodec.createDecoderByType(trackFormat.getString(MediaFormat.KEY_MIME))
-            mediaCodec.configure(trackFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-            var maxBuffer = 1000 * 100;
-            if (trackFormat.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
-                maxBuffer=trackFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE);
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val mediaExtractor = MediaExtractor()
+            mediaExtractor.setDataSource(inputFile)
+            val audioIndex = findTrack(mediaExtractor)
+            if (audioIndex > 0) {
+                mediaExtractor.selectTrack(audioIndex)
+                mediaExtractor.seekTo(startTime, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+                val trackFormat = mediaExtractor.getTrackFormat(audioIndex)
+                val mediaCodec =
+                    MediaCodec.createDecoderByType(trackFormat.getString(MediaFormat.KEY_MIME))
+                mediaCodec.configure(trackFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+                var maxBuffer = 1000 * 100;
+                if (trackFormat.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
+                    maxBuffer = trackFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE);
+                }
+                var byteBuffer = ByteBuffer.allocateDirect(maxBuffer)
+                var bufferInfo = MediaCodec.BufferInfo()
+                val fileChannel=FileOutputStream(outPutPcmFile).channel
+                while (true) {
+                    val avaibleIndex = mediaCodec.dequeueInputBuffer(10000)
+                    if (avaibleIndex >= 0) {
+                        val sampleTime = mediaExtractor.sampleTime
+                        //-1是音频数据的结束符
+                        if (sampleTime == -1L) {
+                            break
+                        } else if (sampleTime < startTime) {
+                            mediaExtractor.advance()
+                            continue
+                        } else if (sampleTime > endTime) {
+                            break
+                        }
+                        val inputBuffer = mediaCodec.getInputBuffer(avaibleIndex)
+                        bufferInfo.size = mediaExtractor.readSampleData(byteBuffer, 0)
+                        bufferInfo.presentationTimeUs = sampleTime
+                        bufferInfo.flags = mediaExtractor.sampleFlags
 
+                        inputBuffer.put(inputBuffer)
+                        mediaCodec.queueInputBuffer(
+                            avaibleIndex,
+                            0,
+                            bufferInfo.size,
+                            bufferInfo.presentationTimeUs,
+                            bufferInfo.flags
+                        )
+                        mediaExtractor.advance()
+                    }
+                    var outPutIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 10000)
+                    while (outPutIndex>=0){
+                        val outByteBuffer=mediaCodec.getOutputBuffer(outPutIndex)
+                        fileChannel.write(outByteBuffer)
+                        mediaCodec.releaseOutputBuffer(outPutIndex,false)
+                        outPutIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 10000)
+                    }
+                }
+                fileChannel.close()
+                mediaExtractor.release()
+                mediaCodec.stop()
+                mediaCodec.release()
+            }
         }
     }
 
@@ -160,7 +205,7 @@ class MusicClibUtils {
             val trackFormat = mediaExtractor.getTrackFormat(index)
             if (trackFormat.containsKey(MediaFormat.KEY_MIME)) {
                 val value = trackFormat.getString(MediaFormat.KEY_MIME)
-                if (value.startsWith("audio/")) {
+                if (value.startsWith("audio/") || value.startsWith("video/")) {
                     trackIndex = index;
                     return trackIndex
                 }
