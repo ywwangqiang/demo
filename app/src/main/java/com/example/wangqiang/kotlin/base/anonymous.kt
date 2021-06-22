@@ -64,5 +64,5 @@ fun main() {
 
 fun showOnBoard(goods: String, showDiscunt: (String, Int) -> String) {
     val hour = (1..24).shuffled().last()
-    System.out.println(showDiscunt(goods, hour))
+    println(showDiscunt(goods, hour))
 }

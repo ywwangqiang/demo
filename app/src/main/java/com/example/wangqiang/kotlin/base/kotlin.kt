@@ -24,3 +24,12 @@ fun <T, R : Comparable<R>> List<T>.findMax(block: (T) -> R): T {
     }
     return maxElement
 }
+
+
+class Plaryer{
+    var url = "http://baidu.com"
+        get() = field.capitalize()
+        set(value) {
+            field=value.trim()
+        }
+}
