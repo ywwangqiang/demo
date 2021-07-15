@@ -1,6 +1,8 @@
 package com.example.wangqiang.kotlin.base
 
 import java.io.File
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  *     author : wangqiang
@@ -19,7 +21,13 @@ fun configWords(): (String) -> String {
         "$it year,"
     }
 }
-
+//public inline fun <T> T.apply(block: T.() -> Unit): T {
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+//    block()
+//    return this
+//}
 fun apply() {
     //apply函数提供可配置函数，返回当前对象
     val file = File("").apply {
@@ -27,7 +35,12 @@ fun apply() {
         setWritable(true)
     }
 }
-
+//public inline fun <T, R> T.let(block: (T) -> R): R {
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+//    return block(this)
+//}
 fun let() {
     //let函数返回lamb的最后一行
     val reslt = listOf(1, 2, 3).first().let {
@@ -36,6 +49,12 @@ fun let() {
 }
 
 //光看作用域，run和pply差不多，但与apply不同，run函数不返回接收者，run返回的是lambda结果，也就是true或者false
+//public inline fun <T, R> T.run(block: T.() -> R): R {
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+//    return block()
+//}
 fun run() {
     val result = File("").run {
         readText().contains("great")
@@ -48,6 +67,13 @@ fun with() {
 
 //also函数和let函数功能相似，和let一样，also也是把接收者作为值参传给lambda，但不同的是：als返回接收者对象，而let返回lambda结果，因为这个差异，also尤其适合针对同一原始对象
 //利用副作用做事，既然also返回的是接收者对象，你就可以基于原始接收者对象执行额外的链式调用
+//public inline fun <T> T.also(block: (T) -> Unit): T {
+//    contract {
+//        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+//    }
+//    block(this)
+//    return this
+//}
 fun also() {
     var fileContents: List<String>
     File("").also {
